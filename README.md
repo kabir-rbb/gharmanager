@@ -63,7 +63,7 @@ php artisan serve --host=127.0.0.1 --port=8000
 CHROMIUM_PATH=/usr/bin/chromium npm run test:e2e
 ```
 
-JSON results, screenshots and logs are written under `artifacts/`; failed-test traces under `test-results/`. Both are ignored by Git. CI uploads test evidence. The CI configuration is not evidence of a GitHub run until the branch is pushed and Actions completes.
+JSON results, screenshots and logs are written under `artifacts/`; failed-test traces under `test-results/`. Both are ignored by Git. The supplied CI template is stored in `docs/ci/web.yml`. GitHub rejected writes to `.github/workflows/web.yml` with the current connection, so no executable Actions workflow or remote CI result is included in this PR. A maintainer with workflow-write permission can copy the template to `.github/workflows/web.yml`, push it and review the resulting checks. Until then, run the documented checks manually in an isolated environment.
 
 ## Remaining scope
 
