@@ -1,0 +1,48 @@
+name: Web validation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite, dom, curl, zip
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist
+      - run: npm ci
+      - name: Isolated environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force
+          php artisan db:seed --class=E2ESeeder --force
+      - run: npm run build
+      - run: php artisan test
+      - run: npm test
+      - run: composer audit --locked && npm audit
+      - name: Browser workflows
+        run: |
+          npx playwright install --with-deps chromium
+          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/ghar-server.log 2>&1 &
+          for i in $(seq 1 30); do curl --fail --silent http://127.0.0.1:8000/up && break || sleep 1; done
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-test-evidence
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
