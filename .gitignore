@@ -22,3 +22,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Generated Laravel caches are environment-specific and can contain secrets.
+/bootstrap/cache/*.php
+/artifacts/
+/playwright-report/
+/test-results/
